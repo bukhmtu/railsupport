@@ -14,13 +14,6 @@ export default function LoginPage({ onLogin, loading }: Props) {
   const [password, setPassword] = useState("");
   const [error,    setError]    = useState("");
 
-  const demos = [
-    { label: "Admin",      fa: "fa-shield-halved",     color: "#E11D48", u: "admin" },
-    { label: "Dispetcher", fa: "fa-headset",            color: "#5E6AD2", u: "disp1" },
-    { label: "Texnik",     fa: "fa-screwdriver-wrench", color: "#059669", u: "tech1" },
-    { label: "Xodim",      fa: "fa-user",               color: "#64748B", u: "user1" },
-  ];
-
   const doLogin = async () => {
     if (!username || !password) { setError("Login va parolni kiriting"); return; }
     setError("");
@@ -84,25 +77,6 @@ export default function LoginPage({ onLogin, loading }: Props) {
                     ? <><FaIcon name="fa-circle-notch" color="#fff" size={13} className="fa-spin" /> Tekshirilmoqda…</>
                     : <><FaIcon name="fa-arrow-right-to-bracket" color="#fff" size={13} /> Kirish</>}
                 </Btn>
-              </div>
-              <div className="mt-5 pt-5" style={{ borderTop:"1px solid rgba(0,0,0,0.07)" }}>
-                <p className="text-xs text-gray-400 text-center mb-3">Demo kirish (parol: 1234)</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {demos.map(d => (
-                    <button key={d.u} onClick={() => { setUsername(d.u); setPassword("1234"); }}
-                      className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left btn-press"
-                      style={{ ...G.card }}>
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                           style={{ background:`${d.color}18`, border:`1px solid ${d.color}28` }}>
-                        <FaIcon name={d.fa} color={d.color} size={12} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-gray-700 truncate">{d.label}</p>
-                        <p className="text-xs text-gray-400 font-mono truncate">{d.u}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
           </div>

@@ -118,6 +118,17 @@ export const api = {
       const { data } = await supabase.auth.getSession();
       return !!data.session;
     },
+
+    async updateProfile(b: { fullname?: string; username?: string; password?: string }): Promise<ApiUser> {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "update_own_profile", ...b },
+        headers: { Authorization: `Bearer ${sessionData.session?.access_token}` },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.detail) throw new Error(data.detail);
+      return data;
+    },
   },
 
   departments: {

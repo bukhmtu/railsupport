@@ -96,8 +96,8 @@ export const CAT_META: Record<string, { fa: string; color: string }> = {
 export const ROLE_META: Record<Role, RoleMeta> = {
   admin:      { label:"Admin",        bg:"rgba(254,242,242,0.90)", fg:"#9F1239", icon:"fa-shield-halved",      iconColor:"#E11D48" },
   dispatcher: { label:"Dispetcher",   bg:"rgba(238,242,255,0.90)", fg:"#3730A3", icon:"fa-headset",            iconColor:"#5E6AD2" },
-  technician: { label:"Texnik xodim", bg:"rgba(236,253,245,0.90)", fg:"#065F46", icon:"fa-screwdriver-wrench", iconColor:"#059669" },
-  employee:   { label:"Xodim",        bg:"rgba(248,250,252,0.90)", fg:"#475569", icon:"fa-user",               iconColor:"#64748B" },
+  technician: { label:"Muhandis",     bg:"rgba(236,253,245,0.90)", fg:"#065F46", icon:"fa-screwdriver-wrench", iconColor:"#059669" },
+  employee:   { label:"Bo'lim xodimi",bg:"rgba(248,250,252,0.90)", fg:"#475569", icon:"fa-user",               iconColor:"#64748B" },
 };
 
 export const MENU: Record<Role, MenuItem[]> = {

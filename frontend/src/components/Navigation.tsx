@@ -1,22 +1,28 @@
 import { useState, useEffect } from "react";
 import { G } from "../styles/glass";
 import { MENU, ROLE_META } from "../data/constants";
+import type { Role } from "../data/constants";
 import type { User } from "../App";
-import { Avatar, FaIcon } from "./Atoms";
+import { Avatar, FaIcon, Btn } from "./Atoms";
+import { GlassInput } from "./GlassInput";
+import { Modal } from "./Layout";
+import { api } from "../api/api";
 
 interface SidebarProps {
   user: User;
   page: string;
   setPage: (p: string) => void;
   onLogout: () => void;
+  onProfileUpdated: (u: User) => void;
   notifCount: number;
   mobileOpen: boolean;
   onMobileClose: () => void;
 }
-export function Sidebar({ user, page, setPage, onLogout, notifCount, mobileOpen, onMobileClose }: SidebarProps) {
-  const items = MENU[user.role] ?? [];
-  const rm    = ROLE_META[user.role];
+export function Sidebar({ user, page, setPage, onLogout, onProfileUpdated, notifCount, mobileOpen, onMobileClose }: SidebarProps) {
+  const items = MENU[user.role as Role] ?? [];
+  const rm    = ROLE_META[user.role as Role];
   const nav   = (k: string) => { setPage(k); onMobileClose(); };
+  const [showProfile, setShowProfile] = useState(false);
 
   return (
     <>
@@ -88,6 +94,10 @@ export function Sidebar({ user, page, setPage, onLogout, notifCount, mobileOpen,
                   <FaIcon name={rm.icon} color={rm.iconColor} size={9} />{rm.label}
                 </span>
               </div>
+              <button onClick={() => setShowProfile(true)} className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 btn-press"
+                      style={{ background:"rgba(0,0,0,0.05)" }} title="Profilni tahrirlash">
+                <FaIcon name="fa-pen" color="#6B7280" size={11} />
+              </button>
             </div>
             <button onClick={onLogout}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-500 rounded-xl btn-press"
@@ -99,7 +109,62 @@ export function Sidebar({ user, page, setPage, onLogout, notifCount, mobileOpen,
           </div>
         </div>
       </aside>
+
+      {showProfile && (
+        <ProfileEditModal user={user} onClose={() => setShowProfile(false)}
+          onSaved={u => { onProfileUpdated(u); setShowProfile(false); }} />
+      )}
     </>
+  );
+}
+
+/* ─── PROFIL TAHRIRLASH ───────────────────────────────────────── */
+interface ProfileEditModalProps { user: User; onClose: () => void; onSaved: (u: User) => void; }
+function ProfileEditModal({ user, onClose, onSaved }: ProfileEditModalProps) {
+  const [fullname, setFullname] = useState(user.fullname);
+  const [username, setUsername] = useState(user.username);
+  const [password, setPassword] = useState("");
+  const [saving,   setSaving]   = useState(false);
+  const [error,    setError]    = useState("");
+
+  const save = async () => {
+    if (!fullname || !username) { setError("F.I.Sh va login bo'sh bo'lmasin"); return; }
+    setError("");
+    setSaving(true);
+    try {
+      const body: { fullname?: string; username?: string; password?: string } = {};
+      if (fullname !== user.fullname) body.fullname = fullname;
+      if (username !== user.username) body.username = username;
+      if (password) body.password = password;
+      const updated = await api.auth.updateProfile(body);
+      onSaved({ id: updated.id, fullname: updated.fullname, username: updated.username, role: updated.role, is_active: updated.is_active });
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal title="Profilni tahrirlash" onClose={onClose}>
+      <div className="space-y-4">
+        {error && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm text-rose-700"
+               style={{ background:"rgba(254,226,226,0.8)", border:"1px solid rgba(252,165,165,0.5)" }}>
+            <FaIcon name="fa-circle-exclamation" color="#E11D48" size={14} />{error}
+          </div>
+        )}
+        <GlassInput label="F.I.Sh" value={fullname} onChange={setFullname} placeholder="Ism Familiya" />
+        <GlassInput label="Login (username)" value={username} onChange={setUsername} placeholder="username" />
+        <GlassInput label="Yangi parol (ixtiyoriy)" type="password" value={password} onChange={setPassword} placeholder="o'zgartirmasangiz bo'sh qoldiring" />
+        <div className="flex gap-2 pt-1">
+          <Btn variant="outline" onClick={onClose} className="flex-1">Bekor</Btn>
+          <Btn variant="primary" onClick={save} disabled={saving} className="flex-1">
+            {saving ? "Saqlanmoqda…" : "Saqlash"}
+          </Btn>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
@@ -116,7 +181,7 @@ export function Header({ user, page, notifCount, onHamburger }: HeaderProps) {
 
   const allPages = Object.values(MENU).flat();
   const pageItem = allPages.find(p => p.k === page);
-  const rm       = ROLE_META[user.role];
+  const rm       = ROLE_META[user.role as Role];
 
   return (
     <header className="sticky top-0 z-30 flex-shrink-0 px-4 sm:px-5 h-14 flex items-center justify-between" style={G.header}>

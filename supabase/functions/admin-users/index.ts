@@ -45,6 +45,45 @@ Deno.serve(async (req) => {
     // Privilegiyalangan amallar uchun service_role client
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
+    const body = await req.json();
+    const action = body.action as string;
+
+    // ── Har qanday authenticated user o'z profilini tahrirlashi mumkin ──
+    if (action === "update_own_profile") {
+      const { fullname, username, password } = body;
+      const updates: Record<string, unknown> = {};
+      const profileUpdates: Record<string, unknown> = {};
+
+      if (username) {
+        const { data: taken } = await admin
+          .from("profiles")
+          .select("id")
+          .eq("username", username)
+          .neq("id", userData.user.id)
+          .maybeSingle();
+        if (taken) return json({ detail: "Bu login band" }, 400);
+        updates.email = `${username}@${EMAIL_DOMAIN}`;
+        profileUpdates.username = username;
+      }
+      if (fullname) profileUpdates.fullname = fullname;
+      if (password) {
+        if (password.length < 4) return json({ detail: "Parol kamida 4 ta belgidan iborat bo'lsin" }, 400);
+        updates.password = password;
+      }
+      if (Object.keys(updates).length > 0) {
+        updates.user_metadata = { ...(fullname && { fullname }), ...(username && { username }) };
+        const { error } = await admin.auth.admin.updateUserById(userData.user.id, updates);
+        if (error) return json({ detail: error.message }, 400);
+      }
+      if (Object.keys(profileUpdates).length > 0) {
+        const { error } = await admin.from("profiles").update(profileUpdates).eq("id", userData.user.id);
+        if (error) return json({ detail: error.message }, 400);
+      }
+      const { data: updatedProfile } = await admin.from("profiles").select("*").eq("id", userData.user.id).single();
+      return json(updatedProfile);
+    }
+
+    // ── Qolgan amallar faqat admin uchun ──
     const { data: profile } = await admin
       .from("profiles")
       .select("role")
@@ -54,9 +93,6 @@ Deno.serve(async (req) => {
     if (!profile || profile.role !== "admin") {
       return json({ detail: "Ruxsat yo'q" }, 403);
     }
-
-    const body = await req.json();
-    const action = body.action as string;
 
     if (action === "create") {
       const { fullname, username, password, role } = body;

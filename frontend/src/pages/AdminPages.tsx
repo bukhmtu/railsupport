@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
 import { ROLE_META } from "../data/constants";
+import type { Role } from "../data/constants";
 import type { Ticket, Log } from "../App";
 import type { User } from "../App";
 import { G } from "../styles/glass";
 import { Avatar, FaIcon, KpiRing, Btn } from "../components/Atoms";
-import { GlassInput } from "../components/GlassInput";
+import { GlassDropdown, GlassInput } from "../components/GlassInput";
+import { Modal } from "../components/Layout";
 import { useChartJs } from "../hooks/useChartJs";
 import { api } from "../api/api";
 
@@ -126,11 +128,14 @@ export function KpiPage({ tickets, allUsers }: { tickets: Ticket[]; allUsers: Us
 
 /* ─── USERS TABLE ─────────────────────────────────────────── */
 export function UsersTable({ users, onRefresh }: { users: User[]; onRefresh: () => void }) {
-  const [showAdd, setShowAdd] = useState(false);
+  const [showAdd,   setShowAdd]   = useState(false);
   const [form, setForm]       = useState({ fullname:"", username:"", password:"", role:"employee" });
   const [saving, setSaving]   = useState(false);
+  const [resetFor, setResetFor] = useState<User | null>(null);
+  const [newPass,  setNewPass]  = useState("");
+  const [resetting, setResetting] = useState(false);
 
-  const roleOpts = ["admin","dispatcher","technician","employee"];
+  const roleOpts = (Object.keys(ROLE_META) as Role[]).map(r => ({ value:r, label:ROLE_META[r].label }));
 
   const handleAdd = async () => {
     if (!form.fullname || !form.username || !form.password) { alert("Barcha maydonlarni to'ldiring"); return; }
@@ -149,6 +154,17 @@ export function UsersTable({ users, onRefresh }: { users: User[]; onRefresh: () 
       await api.users.update(u.id, { is_active: !u.is_active });
       onRefresh();
     } catch (e: any) { alert(e.message); }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetFor || newPass.length < 4) { alert("Parol kamida 4 ta belgidan iborat bo'lsin"); return; }
+    setResetting(true);
+    try {
+      await api.users.resetPassword(resetFor.id, newPass);
+      setResetFor(null); setNewPass("");
+      alert(`${resetFor.fullname} uchun yangi parol o'rnatildi`);
+    } catch (e: any) { alert(e.message); }
+    finally { setResetting(false); }
   };
 
   return (
@@ -170,7 +186,10 @@ export function UsersTable({ users, onRefresh }: { users: User[]; onRefresh: () 
             <GlassInput label="F.I.Sh" value={form.fullname} onChange={v => setForm(f => ({...f,fullname:v}))} placeholder="Ism Familiya" />
             <GlassInput label="Username" value={form.username} onChange={v => setForm(f => ({...f,username:v}))} placeholder="login" />
             <GlassInput label="Parol" type="password" value={form.password} onChange={v => setForm(f => ({...f,password:v}))} placeholder="parol" />
-            <GlassInput label="Rol" value={form.role} onChange={v => setForm(f => ({...f,role:v}))} as="select" options={roleOpts} />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Rol</label>
+              <GlassDropdown value={form.role} onChange={v => setForm(f => ({...f,role:v}))} options={roleOpts} placeholder="Rol tanlang…" />
+            </div>
           </div>
           <div className="flex gap-2">
             <Btn variant="outline" size="sm" onClick={() => setShowAdd(false)}>Bekor</Btn>
@@ -223,10 +242,16 @@ export function UsersTable({ users, onRefresh }: { users: User[]; onRefresh: () 
                     </span>
                   </td>
                   <td className="px-5 py-3.5">
-                    <button onClick={() => handleToggle(u)} className="text-xs px-2.5 py-1 rounded-lg font-medium btn-press"
-                            style={{ background:u.is_active?"rgba(225,29,72,0.07)":"rgba(5,150,105,0.07)", color:u.is_active?"#E11D48":"#059669" }}>
-                      {u.is_active ? "Blokla" : "Faollashtir"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => { setResetFor(u); setNewPass(""); }} className="text-xs px-2.5 py-1 rounded-lg font-medium btn-press"
+                              style={{ background:"rgba(94,106,210,0.08)", color:"#5E6AD2" }}>
+                        Parolni tiklash
+                      </button>
+                      <button onClick={() => handleToggle(u)} className="text-xs px-2.5 py-1 rounded-lg font-medium btn-press"
+                              style={{ background:u.is_active?"rgba(225,29,72,0.07)":"rgba(5,150,105,0.07)", color:u.is_active?"#E11D48":"#059669" }}>
+                        {u.is_active ? "Blokla" : "Faollashtir"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -234,6 +259,27 @@ export function UsersTable({ users, onRefresh }: { users: User[]; onRefresh: () 
           </tbody>
         </table>
       </div>
+
+      {resetFor && (
+        <Modal title="Parolni tiklash" onClose={() => setResetFor(null)}>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Avatar name={resetFor.fullname} />
+              <div>
+                <p className="font-semibold text-gray-800 text-sm">{resetFor.fullname}</p>
+                <p className="text-xs font-mono text-gray-400">{resetFor.username}</p>
+              </div>
+            </div>
+            <GlassInput label="Yangi parol" type="password" value={newPass} onChange={setNewPass} placeholder="kamida 4 belgi" />
+            <div className="flex gap-2">
+              <Btn variant="outline" size="sm" onClick={() => setResetFor(null)} className="flex-1">Bekor</Btn>
+              <Btn variant="primary" size="sm" onClick={handleResetPassword} disabled={resetting} className="flex-1">
+                {resetting ? "Saqlanmoqda…" : "Saqlash"}
+              </Btn>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

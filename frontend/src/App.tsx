@@ -222,7 +222,7 @@ export default function App() {
       <BgBlobs />
       <div className="flex h-screen overflow-hidden">
         <Sidebar user={user} page={page} setPage={setPage}
-          onLogout={logout} notifCount={notifCount}
+          onLogout={logout} onProfileUpdated={setUser} notifCount={notifCount}
           mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           <Header user={user} page={page} notifCount={notifCount} onHamburger={() => setMobileOpen(o => !o)} />
