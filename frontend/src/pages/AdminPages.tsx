@@ -180,7 +180,7 @@ export function UsersTable({ users, onRefresh }: { users: User[]; onRefresh: () 
       </div>
 
       {showAdd && (
-        <div className="mb-4 rounded-2xl p-4" style={G.card}>
+        <div className="relative z-20 mb-4 rounded-2xl p-4" style={G.card}>
           <p className="font-semibold text-gray-800 mb-3">Yangi foydalanuvchi</p>
           <div className="grid sm:grid-cols-2 gap-3 mb-3">
             <GlassInput label="F.I.Sh" value={form.fullname} onChange={v => setForm(f => ({...f,fullname:v}))} placeholder="Ism Familiya" />
