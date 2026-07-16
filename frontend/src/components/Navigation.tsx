@@ -161,22 +161,15 @@ function ProfileEditModal({ user, onClose, onSaved }: ProfileEditModalProps) {
   );
 }
 
-/* ─── FOYDALANUVCHI MENYUSI (Sozlamalar / Tema / Tizimdan chiqish) ─ */
+/* ─── FOYDALANUVCHI MENYUSI (Sozlamalar / Tizimdan chiqish) ───── */
 interface UserMenuProps { user: User; onLogout: () => void; onProfileUpdated: (u: User) => void; }
 function UserMenu({ user, onLogout, onProfileUpdated }: UserMenuProps) {
   const [open, setOpen]         = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [theme, setTheme]       = useState<Theme>(getInitialTheme());
   const [rect, setRect]         = useState<{ top: number; right: number } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef     = useRef<HTMLDivElement>(null);
   const rm = ROLE_META[user.role as Role];
-
-  const toggleTheme = () => {
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    applyTheme(next);
-    setTheme(next);
-  };
 
   const updateRect = () => {
     const el = triggerRef.current;
@@ -225,10 +218,6 @@ function UserMenu({ user, onLogout, onProfileUpdated }: UserMenuProps) {
         <div ref={menuRef} className="gd-menu" style={{ ...G.dropdown, position:"fixed", top:rect.top, right:rect.right, width:200 }}>
           <div className="gd-item" onClick={() => { setShowProfile(true); setOpen(false); }}>
             <FaIcon name="fa-gear" color="#5E6AD2" size={12} /> Sozlamalar
-          </div>
-          <div className="gd-item" onClick={toggleTheme}>
-            <FaIcon name={theme === "dark" ? "fa-sun" : "fa-moon"} color="#D97706" size={12} />
-            {theme === "dark" ? "Yorug' rejim" : "Tungi rejim"}
           </div>
           <div className="gd-item" onClick={() => { setOpen(false); onLogout(); }} style={{ color:"#E11D48" }}>
             <FaIcon name="fa-arrow-right-from-bracket" color="#E11D48" size={12} /> Tizimdan chiqish
@@ -340,14 +329,13 @@ interface HeaderProps {
   onProfileUpdated: (u: User) => void;
 }
 export function Header({ user, page, tickets, onNavigate, onHamburger, onLogout, onProfileUpdated }: HeaderProps) {
-  const [clock, setClock] = useState("");
+  const [theme, setTheme] = useState<Theme>(getInitialTheme());
 
-  useEffect(() => {
-    const tick = () => setClock(new Date().toLocaleTimeString("uz-UZ", { hour:"2-digit", minute:"2-digit", second:"2-digit" }));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
+  const toggleTheme = () => {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    setTheme(next);
+  };
 
   const allPages = Object.values(MENU).flat();
   const pageItem = allPages.find(p => p.k === page);
@@ -372,9 +360,10 @@ export function Header({ user, page, tickets, onNavigate, onHamburger, onLogout,
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold text-gray-500" style={G.card}>
-          <FaIcon name="fa-clock" color="#5E6AD2" size={10} />{clock}
-        </div>
+        <button onClick={toggleTheme} title={theme === "dark" ? "Yorug' rejim" : "Tungi rejim"}
+          className="w-9 h-9 rounded-xl flex items-center justify-center btn-press" style={G.card}>
+          <FaIcon name={theme === "dark" ? "fa-sun" : "fa-moon"} color="#D97706" size={14} />
+        </button>
         <NotificationBell tickets={tickets} user={user} onNavigate={onNavigate} />
         <UserMenu user={user} onLogout={onLogout} onProfileUpdated={onProfileUpdated} />
       </div>

@@ -97,7 +97,7 @@ export const CSS = `
   --role-admin-bg: rgba(159,18,57,0.35);      --role-admin-fg: #FDA4AF;
   --role-dispatcher-bg: rgba(55,48,163,0.35); --role-dispatcher-fg: #A5B4FC;
   --role-technician-bg: rgba(6,95,70,0.35);   --role-technician-fg: #6EE7B7;
-  --role-employee-bg: rgba(51,65,85,0.5);     --role-employee-fg: #CBD5E1;
+  --role-employee-bg: rgba(71,85,105,0.55);   --role-employee-fg: #E2E8F0;
 }
 
 body{background:var(--page-gradient);}
