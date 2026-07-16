@@ -8,6 +8,7 @@ import { Avatar, FaIcon, KpiRing, Btn } from "../components/Atoms";
 import { GlassDropdown, GlassInput } from "../components/GlassInput";
 import { Modal } from "../components/Layout";
 import { useChartJs } from "../hooks/useChartJs";
+import { cssVar } from "../lib/theme";
 import { api } from "../api/api";
 
 /* ─── KPI PAGE ─────────────────────────────────────────────── */
@@ -31,6 +32,7 @@ export function KpiPage({ tickets, allUsers }: { tickets: Ticket[]; allUsers: Us
   useChartJs((Chart) => {
     const canvas = barRef.current; if (!canvas) return;
     if (barChart.current) barChart.current.destroy();
+    const textColor = cssVar("--text-strong");
     barChart.current = new Chart(canvas, {
       type: "bar",
       data: { labels: stats.map(s => s.fullname.split(" ")[0]),
@@ -39,8 +41,8 @@ export function KpiPage({ tickets, allUsers }: { tickets: Ticket[]; allUsers: Us
           { label:"Faol",        data:stats.map(s => s.active), backgroundColor:"rgba(139,92,246,0.75)", borderRadius:8, borderSkipped:false },
         ]},
       options:{ responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{ position:"top", labels:{ font:{ family:"Plus Jakarta Sans", size:12 }, padding:16, usePointStyle:true } } },
-        scales:{ x:{ grid:{ display:false } }, y:{ grid:{ color:"rgba(0,0,0,0.05)" }, beginAtZero:true } } }
+        plugins:{ legend:{ position:"top", labels:{ color:textColor, font:{ family:"Plus Jakarta Sans", size:12 }, padding:16, usePointStyle:true } } },
+        scales:{ x:{ grid:{ display:false }, ticks:{ color:textColor } }, y:{ grid:{ color:cssVar("--tint-05") }, ticks:{ color:textColor }, beginAtZero:true } } }
     });
   }, [tickets, allUsers]);
 
@@ -50,9 +52,9 @@ export function KpiPage({ tickets, allUsers }: { tickets: Ticket[]; allUsers: Us
     donutChart.current = new Chart(canvas, {
       type: "doughnut",
       data: { labels: stats.map(s => s.fullname.split(" ")[0]),
-        datasets:[{ data:stats.map(s => s.done || 1), backgroundColor:["#059669","#5E6AD2","#7C3AED","#D97706","#DB2777"], borderWidth:2, borderColor:"rgba(255,255,255,0.9)", hoverOffset:6 }]},
+        datasets:[{ data:stats.map(s => s.done || 1), backgroundColor:["#059669","#5E6AD2","#7C3AED","#D97706","#DB2777"], borderWidth:2, borderColor:cssVar("--strong-bg"), hoverOffset:6 }]},
       options:{ responsive:true, maintainAspectRatio:false, cutout:"68%",
-        plugins:{ legend:{ position:"bottom", labels:{ font:{ family:"Plus Jakarta Sans", size:11 }, padding:12, usePointStyle:true } } } }
+        plugins:{ legend:{ position:"bottom", labels:{ color:cssVar("--text-strong"), font:{ family:"Plus Jakarta Sans", size:11 }, padding:12, usePointStyle:true } } } }
     });
   }, [tickets, allUsers]);
 
@@ -103,7 +105,7 @@ export function KpiPage({ tickets, allUsers }: { tickets: Ticket[]; allUsers: Us
                   <span>Samaradorlik</span>
                   <span style={{ color:clr }} className="font-semibold">{s.pct}%</span>
                 </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background:"rgba(0,0,0,0.07)" }}>
+                <div className="h-2 rounded-full overflow-hidden" style={{ background:"var(--tint-07)" }}>
                   <div className="h-full rounded-full transition-all duration-1000"
                        style={{ width:`${s.pct}%`, background:`linear-gradient(90deg,${clr},${clr}bb)` }} />
                 </div>
@@ -221,7 +223,7 @@ export function UsersTable({ users, onRefresh }: { users: User[]; onRefresh: () 
       <div className="hidden sm:block rounded-2xl overflow-hidden card-shine" style={G.card}>
         <table className="w-full text-sm">
           <thead>
-            <tr style={{ borderBottom:"1px solid rgba(0,0,0,0.07)", background:"rgba(0,0,0,0.02)" }}>
+            <tr style={{ borderBottom:"1px solid var(--tint-07)", background:"var(--tint-02)" }}>
               {(["F.I.Sh","Login","Rol","Holat","Amal"] as string[]).map(h => (
                 <th key={h} className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide">{h}</th>
               ))}
@@ -231,13 +233,13 @@ export function UsersTable({ users, onRefresh }: { users: User[]; onRefresh: () 
             {users.map((u, i) => {
               const rm = ROLE_META[u.role as keyof typeof ROLE_META];
               return (
-                <tr key={u.id} style={{ borderBottom:"1px solid rgba(0,0,0,0.04)", background:i%2===0?"transparent":"rgba(0,0,0,0.015)" }} className="hover:bg-blue-50/30 transition-colors">
+                <tr key={u.id} style={{ borderBottom:"1px solid var(--tint-04)", background:i%2===0?"transparent":"var(--tint-015)" }} className="hover:bg-blue-50/30 transition-colors">
                   <td className="px-5 py-3.5"><div className="flex items-center gap-3"><Avatar name={u.fullname} size="sm" /><span className="font-semibold text-gray-800">{u.fullname}</span></div></td>
-                  <td className="px-5 py-3.5"><span className="font-mono text-xs px-2 py-1 rounded-lg" style={{ background:"rgba(0,0,0,0.05)" }}>{u.username}</span></td>
+                  <td className="px-5 py-3.5"><span className="font-mono text-xs px-2 py-1 rounded-lg" style={{ background:"var(--tint-05)" }}>{u.username}</span></td>
                   <td className="px-5 py-3.5"><span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background:rm?.bg, color:rm?.fg }}><FaIcon name={rm?.icon} color={rm?.iconColor} size={9} />{rm?.label}</span></td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-semibold ${u.is_active ? "text-emerald-700" : "text-gray-400"}`}
-                          style={{ background:u.is_active?"rgba(34,197,94,0.1)":"rgba(0,0,0,0.05)", border:`1px solid ${u.is_active?"rgba(34,197,94,0.2)":"rgba(0,0,0,0.1)"}` }}>
+                          style={{ background:u.is_active?"rgba(34,197,94,0.1)":"var(--tint-05)", border:`1px solid ${u.is_active?"rgba(34,197,94,0.2)":"var(--tint-10)"}` }}>
                       <span className={`w-1.5 h-1.5 rounded-full ${u.is_active?"bg-emerald-500":"bg-gray-300"}`} />{u.is_active?"Faol":"Bloklangan"}
                     </span>
                   </td>
@@ -309,7 +311,7 @@ export function LogsTable({ logs }: { logs: Log[] }) {
       <div className="hidden sm:block rounded-2xl overflow-hidden card-shine" style={G.card}>
         <table className="w-full text-sm">
           <thead>
-            <tr style={{ borderBottom:"1px solid rgba(0,0,0,0.07)", background:"rgba(0,0,0,0.02)" }}>
+            <tr style={{ borderBottom:"1px solid var(--tint-07)", background:"var(--tint-02)" }}>
               {(["Amal","Foydalanuvchi","Vaqt"]).map(h => (
                 <th key={h} className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide">{h}</th>
               ))}
@@ -317,7 +319,7 @@ export function LogsTable({ logs }: { logs: Log[] }) {
           </thead>
           <tbody>
             {logs.map((l, i) => (
-              <tr key={l.id} style={{ borderBottom:"1px solid rgba(0,0,0,0.04)", background:i%2===0?"transparent":"rgba(0,0,0,0.015)" }} className="hover:bg-blue-50/20 transition-colors">
+              <tr key={l.id} style={{ borderBottom:"1px solid var(--tint-04)", background:i%2===0?"transparent":"var(--tint-015)" }} className="hover:bg-blue-50/20 transition-colors">
                 <td className="px-5 py-3.5"><div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:"#5E6AD2" }} />{l.action}</div></td>
                 <td className="px-5 py-3.5 font-medium text-gray-500">{l.user}</td>
                 <td className="px-5 py-3.5"><span className="font-mono text-xs text-gray-400">{l.time}</span></td>

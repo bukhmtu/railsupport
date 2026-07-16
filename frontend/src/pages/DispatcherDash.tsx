@@ -106,7 +106,7 @@ export default function DispatcherDash({ tickets, technicians, onStatusChange, o
                       <span className="text-emerald-600 font-medium">{done} ✓</span>
                     </div>
                   </div>
-                  <div className="h-2 rounded-full overflow-hidden" style={{ background:"rgba(0,0,0,0.07)" }}>
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background:"var(--tint-07)" }}>
                     <div className="h-full rounded-full transition-all duration-700"
                          style={{ width:`${Math.min(active*25,100)}%`, background:`linear-gradient(90deg,${clr},${clr}aa)` }} />
                   </div>
@@ -141,9 +141,9 @@ export default function DispatcherDash({ tickets, technicians, onStatusChange, o
                   <div className="flex items-center gap-2.5 w-full">
                     {opt.value
                       ? <Avatar name={opt.label} size="sm" />
-                      : <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background:"rgba(0,0,0,0.06)" }}><FaIcon name="fa-user" color="#9CA3AF" size={12} /></div>}
+                      : <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background:"var(--tint-06)" }}><FaIcon name="fa-user" color="#9CA3AF" size={12} /></div>}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color:opt.value?"#1e293b":"#9CA3AF" }}>{opt.label}</p>
+                      <p className="text-sm font-semibold truncate" style={{ color:opt.value?"var(--text-strong)":"#9CA3AF" }}>{opt.label}</p>
                       {opt.value && (() => {
                         const tech   = technicians.find(t => String(t.id) === opt.value);
                         const active = tech ? tickets.filter(x => x.assigned_to === tech.id && ["qabul","jarayon"].includes(x.status)).length : 0;

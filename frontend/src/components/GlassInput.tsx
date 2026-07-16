@@ -58,7 +58,7 @@ export function GlassDropdown({ value, onChange, options, placeholder, renderOpt
   return (
     <div className="gd-wrap" ref={wrapRef}>
       <button className="gd-trigger glass-input" style={G.input} onClick={() => setOpen(o => !o)}>
-        <span style={{ color: selected ? "#1e293b" : "#94a3b8", flex:1, textAlign:"left" }}>
+        <span style={{ color: selected ? "var(--text-strong)" : "#94a3b8", flex:1, textAlign:"left" }}>
           {selected ? (renderSelected ? renderSelected(selected) : selected.label) : placeholder}
         </span>
         <FaIcon name={open ? "fa-chevron-up" : "fa-chevron-down"} color="#5E6AD2" size={11} />

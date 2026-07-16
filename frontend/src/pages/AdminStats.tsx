@@ -5,6 +5,7 @@ import type { TicketStatus } from "../data/constants";
 import { G } from "../styles/glass";
 import { FaIcon, Badge, StatCard } from "../components/Atoms";
 import { useChartJs } from "../hooks/useChartJs";
+import { cssVar } from "../lib/theme";
 
 const COLORS = ["#5E6AD2","#7C3AED","#059669","#D97706","#E11D48","#0891B2","#DB2777","#EA580C"];
 
@@ -31,10 +32,10 @@ export default function AdminStats({ tickets }: { tickets: Ticket[] }) {
       .filter(x => x.count > 0);
     chartRef.current = new Chart(canvas, {
       type:"doughnut",
-      data: { labels:deptData.map(d => d.name), datasets:[{ data:deptData.map(d => d.count), backgroundColor:COLORS, borderWidth:2, borderColor:"rgba(255,255,255,0.9)", hoverOffset:6 }] },
+      data: { labels:deptData.map(d => d.name), datasets:[{ data:deptData.map(d => d.count), backgroundColor:COLORS, borderWidth:2, borderColor:cssVar("--strong-bg"), hoverOffset:6 }] },
       options: { responsive:true, maintainAspectRatio:false, cutout:"60%",
-        plugins: { legend:{ position:"right", labels:{ font:{ family:"Plus Jakarta Sans", size:11 }, padding:10, usePointStyle:true, boxWidth:8 } },
-          tooltip:{ backgroundColor:"rgba(255,255,255,0.95)", titleColor:"#1e293b", bodyColor:"#475569", borderColor:"rgba(255,255,255,0.8)", borderWidth:1, padding:10, cornerRadius:10,
+        plugins: { legend:{ position:"right", labels:{ color:cssVar("--text-strong"), font:{ family:"Plus Jakarta Sans", size:11 }, padding:10, usePointStyle:true, boxWidth:8 } },
+          tooltip:{ backgroundColor:cssVar("--dropdown-bg"), titleColor:cssVar("--text-strong"), bodyColor:cssVar("--text-item"), borderColor:cssVar("--card-border"), borderWidth:1, padding:10, cornerRadius:10,
             titleFont:{ family:"Plus Jakarta Sans", weight:"bold" }, bodyFont:{ family:"Plus Jakarta Sans" } } } }
     });
   }, [tickets]);
@@ -70,7 +71,7 @@ export default function AdminStats({ tickets }: { tickets: Ticket[] }) {
                     </div>
                     <span className="font-bold flex-shrink-0" style={{ color:c }}>{item.count}</span>
                   </div>
-                  <div className="h-2 rounded-full overflow-hidden" style={{ background:"rgba(0,0,0,0.07)" }}>
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background:"var(--tint-07)" }}>
                     <div className="h-full rounded-full" style={{ width:`${(item.count/maxC)*100}%`, background:`linear-gradient(90deg,${c},${c}bb)` }} />
                   </div>
                 </div>
@@ -98,7 +99,7 @@ export default function AdminStats({ tickets }: { tickets: Ticket[] }) {
             return (
               <div key={k} className="flex items-center gap-3">
                 <Badge status={k} />
-                <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background:"rgba(0,0,0,0.07)" }}>
+                <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background:"var(--tint-07)" }}>
                   <div className="h-full rounded-full" style={{ width:`${pctBar}%`, background:v.dot }} />
                 </div>
                 <span className="text-sm font-bold text-gray-700 w-5 text-right flex-shrink-0">{count}</span>

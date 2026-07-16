@@ -73,10 +73,10 @@ export function Btn({ children, variant = "primary", onClick, className = "", si
   const styles: Record<BtnVariant, CSSProperties> = {
     primary: { background:"linear-gradient(135deg,#5E6AD2,#7C3AED)", color:"#fff", boxShadow:"0 2px 10px rgba(94,106,210,0.30), inset 0 1px 0 rgba(255,255,255,0.15)", border:"1px solid rgba(94,106,210,0.4)" },
     ghost:   { background:"transparent", color:"#5E6AD2", border:"none" },
-    outline: { background:"rgba(255,255,255,0.70)", color:"#334155", border:"1px solid rgba(203,213,225,0.9)", backdropFilter:"blur(10px)", boxShadow:"0 1px 4px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.9)" },
+    outline: { background:"var(--btn-outline-bg)", color:"var(--btn-outline-fg)", border:"1px solid var(--btn-outline-border)", backdropFilter:"blur(10px)", boxShadow:"0 1px 4px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.9)" },
     danger:  { background:"linear-gradient(135deg,#E11D48,#BE123C)", color:"#fff", boxShadow:"0 2px 10px rgba(225,29,72,0.25)", border:"1px solid rgba(190,18,60,0.3)" },
     success: { background:"linear-gradient(135deg,#059669,#047857)", color:"#fff", boxShadow:"0 2px 10px rgba(5,150,105,0.25)", border:"1px solid rgba(4,120,87,0.3)" },
-    soft:    { background:"rgba(238,242,255,0.90)", color:"#3730A3", border:"1px solid rgba(94,106,210,0.20)", backdropFilter:"blur(10px)" },
+    soft:    { background:"var(--btn-soft-bg)", color:"var(--btn-soft-fg)", border:"1px solid rgba(94,106,210,0.20)", backdropFilter:"blur(10px)" },
     orange:  { background:"linear-gradient(135deg,#D97706,#EA580C)", color:"#fff", boxShadow:"0 2px 10px rgba(217,119,6,0.25)", border:"1px solid rgba(234,88,12,0.3)" },
   };
   return (
@@ -115,7 +115,7 @@ export function KpiRing({ pct, color, size = 80 }: KpiRingProps) {
   const r = (size - 10) / 2, circ = 2 * Math.PI * r, dash = circ * (pct / 100);
   return (
     <svg width={size} height={size} style={{ transform:"rotate(-90deg)" }}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(0,0,0,0.07)" strokeWidth={7} />
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--tint-07)" strokeWidth={7} />
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={7}
         strokeDasharray={`${dash} ${circ - dash}`} strokeLinecap="round"
         className="kpi-ring" style={{ filter:`drop-shadow(0 0 4px ${color}66)` }} />

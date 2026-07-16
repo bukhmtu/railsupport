@@ -38,13 +38,13 @@ export function NewTicketToast({ ticket, kind, onView, onClose }: NewTicketToast
                 Ko'rish
               </button>
               <button onClick={onClose} className="text-xs font-semibold px-3 py-1.5 rounded-lg btn-press text-gray-500"
-                      style={{ background:"rgba(0,0,0,0.05)" }}>
+                      style={{ background:"var(--tint-05)" }}>
                 Yopish
               </button>
             </div>
           </div>
           <button onClick={onClose} className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-gray-600"
-                  style={{ background:"rgba(0,0,0,0.05)" }}>
+                  style={{ background:"var(--tint-05)" }}>
             <FaIcon name="fa-xmark" color="currentColor" size={11} />
           </button>
         </div>

@@ -8,6 +8,8 @@ import { Avatar, FaIcon, Btn } from "./Atoms";
 import { GlassInput } from "./GlassInput";
 import { Modal } from "./Layout";
 import { api } from "../api/api";
+import { getInitialTheme, applyTheme } from "../lib/theme";
+import type { Theme } from "../lib/theme";
 
 function notifTargetPage(role: string): string {
   if (role === "dispatcher") return "new-tickets";
@@ -49,7 +51,7 @@ export function Sidebar({ user, page, setPage, notifCount, mobileOpen, onMobileC
         ].join(" ")}>
 
         <div className="px-5 py-4 flex items-center justify-between flex-shrink-0"
-             style={{ borderBottom:"1px solid rgba(0,0,0,0.06)" }}>
+             style={{ borderBottom:"1px solid var(--tint-06)" }}>
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
                  style={{ background:"linear-gradient(135deg,#5E6AD2,#7C3AED)", boxShadow:"0 2px 10px rgba(94,106,210,0.30)", border:"1px solid rgba(255,255,255,0.2)" }}>🚂</div>
@@ -59,7 +61,7 @@ export function Sidebar({ user, page, setPage, notifCount, mobileOpen, onMobileC
             </div>
           </div>
           <button onClick={onMobileClose} className="lg:hidden w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ background:"rgba(0,0,0,0.06)" }}>
+                  style={{ background:"var(--tint-06)" }}>
             <FaIcon name="fa-xmark" color="#6B7280" size={12} />
           </button>
         </div>
@@ -92,7 +94,7 @@ export function Sidebar({ user, page, setPage, notifCount, mobileOpen, onMobileC
           </ul>
         </nav>
 
-        <div className="p-3.5 flex-shrink-0" style={{ borderTop:"1px solid rgba(0,0,0,0.06)" }}>
+        <div className="p-3.5 flex-shrink-0" style={{ borderTop:"1px solid var(--tint-06)" }}>
           <div className="rounded-2xl p-3 flex items-center gap-3" style={G.card}>
             <Avatar name={user.fullname} />
             <div className="min-w-0 flex-1">
@@ -159,15 +161,22 @@ function ProfileEditModal({ user, onClose, onSaved }: ProfileEditModalProps) {
   );
 }
 
-/* ─── FOYDALANUVCHI MENYUSI (Sozlamalar / Tizimdan chiqish) ───── */
+/* ─── FOYDALANUVCHI MENYUSI (Sozlamalar / Tema / Tizimdan chiqish) ─ */
 interface UserMenuProps { user: User; onLogout: () => void; onProfileUpdated: (u: User) => void; }
 function UserMenu({ user, onLogout, onProfileUpdated }: UserMenuProps) {
   const [open, setOpen]         = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [theme, setTheme]       = useState<Theme>(getInitialTheme());
   const [rect, setRect]         = useState<{ top: number; right: number } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef     = useRef<HTMLDivElement>(null);
   const rm = ROLE_META[user.role as Role];
+
+  const toggleTheme = () => {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    setTheme(next);
+  };
 
   const updateRect = () => {
     const el = triggerRef.current;
@@ -203,7 +212,7 @@ function UserMenu({ user, onLogout, onProfileUpdated }: UserMenuProps) {
   return (
     <>
       <button ref={triggerRef} onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 pl-2 border-l btn-press rounded-lg" style={{ borderColor:"rgba(0,0,0,0.08)" }}>
+        className="flex items-center gap-2 pl-2 border-l btn-press rounded-lg" style={{ borderColor:"var(--tint-08)" }}>
         <Avatar name={user.fullname} size="sm" />
         <div className="hidden sm:block text-left">
           <p className="text-xs font-semibold text-gray-800 leading-tight">{user.fullname}</p>
@@ -216,6 +225,10 @@ function UserMenu({ user, onLogout, onProfileUpdated }: UserMenuProps) {
         <div ref={menuRef} className="gd-menu" style={{ ...G.dropdown, position:"fixed", top:rect.top, right:rect.right, width:200 }}>
           <div className="gd-item" onClick={() => { setShowProfile(true); setOpen(false); }}>
             <FaIcon name="fa-gear" color="#5E6AD2" size={12} /> Sozlamalar
+          </div>
+          <div className="gd-item" onClick={toggleTheme}>
+            <FaIcon name={theme === "dark" ? "fa-sun" : "fa-moon"} color="#D97706" size={12} />
+            {theme === "dark" ? "Yorug' rejim" : "Tungi rejim"}
           </div>
           <div className="gd-item" onClick={() => { setOpen(false); onLogout(); }} style={{ color:"#E11D48" }}>
             <FaIcon name="fa-arrow-right-from-bracket" color="#E11D48" size={12} /> Tizimdan chiqish
@@ -289,7 +302,7 @@ function NotificationBell({ tickets, user, onNavigate }: NotificationBellProps) 
       )}
       {open && rect && createPortal(
         <div ref={menuRef} className="gd-menu" style={{ ...G.dropdown, position:"fixed", top:rect.top, right:rect.right, width:300, padding:0 }}>
-          <div className="px-4 py-3" style={{ borderBottom:"1px solid rgba(0,0,0,0.06)" }}>
+          <div className="px-4 py-3" style={{ borderBottom:"1px solid var(--tint-06)" }}>
             <span className="font-semibold text-gray-800 text-sm">Bildirishnomalar</span>
           </div>
           <div style={{ maxHeight: 280, overflowY: "auto" }}>
@@ -306,7 +319,7 @@ function NotificationBell({ tickets, user, onNavigate }: NotificationBellProps) 
             ))}
           </div>
           {items.length > 0 && (
-            <div className="px-4 py-2.5" style={{ borderTop:"1px solid rgba(0,0,0,0.06)" }}>
+            <div className="px-4 py-2.5" style={{ borderTop:"1px solid var(--tint-06)" }}>
               <button onClick={goToList} className="text-xs font-semibold text-blue-600 w-full text-center">Barchasini ko'rish</button>
             </div>
           )}

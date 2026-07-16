@@ -33,7 +33,7 @@ export default function LoginPage({ onLogin, loading }: Props) {
           <div className="relative z-10">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                   style={{ background:"rgba(255,255,255,0.18)", backdropFilter:"blur(10px)", border:"1px solid rgba(255,255,255,0.3)", boxShadow:"0 4px 16px rgba(0,0,0,0.15)" }}>🚂</div>
+                   style={{ background:"rgba(255,255,255,0.18)", backdropFilter:"blur(10px)", border:"1px solid rgba(255,255,255,0.3)", boxShadow:"0 4px 16px var(--tint-15)" }}>🚂</div>
               <div>
                 <p className="text-white font-bold text-xl leading-tight">RailSupport</p>
                 <p className="text-indigo-200 text-xs">Texnik yordam tizimi</p>

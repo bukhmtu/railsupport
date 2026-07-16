@@ -66,17 +66,17 @@ export interface MenuItem {
 
 /* ─── CONSTANTS ──────────────────────────────────────────────── */
 export const STATUS: Record<TicketStatus, StatusMeta> = {
-  yangi:      { label:"Yangi",          bg:"rgba(255,251,235,0.90)", fg:"#92400E", dot:"#D97706", glow:"rgba(217,119,6,0.15)"   },
-  qabul:      { label:"Qabul qilindi",  bg:"rgba(238,242,255,0.90)", fg:"#3730A3", dot:"#5E6AD2", glow:"rgba(94,106,210,0.15)" },
-  jarayon:    { label:"Jarayonda",      bg:"rgba(245,243,255,0.90)", fg:"#5B21B6", dot:"#7C3AED", glow:"rgba(124,58,237,0.15)"  },
-  tugallandi: { label:"Tugallandi",     bg:"rgba(236,253,245,0.90)", fg:"#065F46", dot:"#059669", glow:"rgba(5,150,105,0.15)"   },
-  bekor:      { label:"Bekor qilindi",  bg:"rgba(255,241,242,0.90)", fg:"#9F1239", dot:"#E11D48", glow:"rgba(225,29,72,0.15)"   },
+  yangi:      { label:"Yangi",          bg:"var(--status-yangi-bg)",      fg:"var(--status-yangi-fg)",      dot:"#D97706", glow:"rgba(217,119,6,0.15)"   },
+  qabul:      { label:"Qabul qilindi",  bg:"var(--status-qabul-bg)",      fg:"var(--status-qabul-fg)",      dot:"#5E6AD2", glow:"rgba(94,106,210,0.15)" },
+  jarayon:    { label:"Jarayonda",      bg:"var(--status-jarayon-bg)",    fg:"var(--status-jarayon-fg)",    dot:"#7C3AED", glow:"rgba(124,58,237,0.15)"  },
+  tugallandi: { label:"Tugallandi",     bg:"var(--status-tugallandi-bg)", fg:"var(--status-tugallandi-fg)", dot:"#059669", glow:"rgba(5,150,105,0.15)"   },
+  bekor:      { label:"Bekor qilindi",  bg:"var(--status-bekor-bg)",      fg:"var(--status-bekor-fg)",      dot:"#E11D48", glow:"rgba(225,29,72,0.15)"   },
 };
 
 export const PRIORITY: Record<Priority, PriorityMeta> = {
-  yuqori: { label:"Yuqori",  bg:"rgba(255,241,242,0.90)", fg:"#9F1239", dot:"#E11D48", fa:"fa-arrow-up"    },
-  orta:   { label:"O'rta",   bg:"rgba(255,251,235,0.90)", fg:"#92400E", dot:"#D97706", fa:"fa-minus"       },
-  past:   { label:"Past",    bg:"rgba(240,253,250,0.90)", fg:"#065F46", dot:"#059669", fa:"fa-arrow-down"  },
+  yuqori: { label:"Yuqori",  bg:"var(--priority-yuqori-bg)", fg:"var(--priority-yuqori-fg)", dot:"#E11D48", fa:"fa-arrow-up"    },
+  orta:   { label:"O'rta",   bg:"var(--priority-orta-bg)",   fg:"var(--priority-orta-fg)",   dot:"#D97706", fa:"fa-minus"       },
+  past:   { label:"Past",    bg:"var(--priority-past-bg)",   fg:"var(--priority-past-fg)",   dot:"#059669", fa:"fa-arrow-down"  },
 };
 
 export const CATEGORIES: string[]  = ["Internet","Printer","Kartridj","Kamera","Kompyuter","Telefon","Server","Dastur ishlamayapti"];
@@ -94,10 +94,10 @@ export const CAT_META: Record<string, { fa: string; color: string }> = {
 };
 
 export const ROLE_META: Record<Role, RoleMeta> = {
-  admin:      { label:"Admin",        bg:"rgba(254,242,242,0.90)", fg:"#9F1239", icon:"fa-shield-halved",      iconColor:"#E11D48" },
-  dispatcher: { label:"Dispetcher",   bg:"rgba(238,242,255,0.90)", fg:"#3730A3", icon:"fa-headset",            iconColor:"#5E6AD2" },
-  technician: { label:"Muhandis",     bg:"rgba(236,253,245,0.90)", fg:"#065F46", icon:"fa-screwdriver-wrench", iconColor:"#059669" },
-  employee:   { label:"Bo'lim xodimi",bg:"rgba(248,250,252,0.90)", fg:"#475569", icon:"fa-user",               iconColor:"#64748B" },
+  admin:      { label:"Admin",        bg:"var(--role-admin-bg)",      fg:"var(--role-admin-fg)",      icon:"fa-shield-halved",      iconColor:"#E11D48" },
+  dispatcher: { label:"Dispetcher",   bg:"var(--role-dispatcher-bg)", fg:"var(--role-dispatcher-fg)", icon:"fa-headset",            iconColor:"#5E6AD2" },
+  technician: { label:"Muhandis",     bg:"var(--role-technician-bg)", fg:"var(--role-technician-fg)", icon:"fa-screwdriver-wrench", iconColor:"#059669" },
+  employee:   { label:"Bo'lim xodimi",bg:"var(--role-employee-bg)",   fg:"var(--role-employee-fg)",   icon:"fa-user",               iconColor:"#64748B" },
 };
 
 export const MENU: Record<Role, MenuItem[]> = {

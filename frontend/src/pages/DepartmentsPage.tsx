@@ -98,7 +98,7 @@ export default function DepartmentsPage() {
       <div className="hidden sm:block rounded-2xl overflow-hidden card-shine" style={G.card}>
         <table className="w-full text-sm">
           <thead>
-            <tr style={{ borderBottom:"1px solid rgba(0,0,0,0.07)", background:"rgba(0,0,0,0.02)" }}>
+            <tr style={{ borderBottom:"1px solid var(--tint-07)", background:"var(--tint-02)" }}>
               {(["Nomi","Holat","Amal"] as string[]).map(h => (
                 <th key={h} className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide">{h}</th>
               ))}
@@ -106,7 +106,7 @@ export default function DepartmentsPage() {
           </thead>
           <tbody>
             {depts.map((d, i) => (
-              <tr key={d.id} style={{ borderBottom:"1px solid rgba(0,0,0,0.04)", background:i%2===0?"transparent":"rgba(0,0,0,0.015)" }} className="hover:bg-blue-50/30 transition-colors">
+              <tr key={d.id} style={{ borderBottom:"1px solid var(--tint-04)", background:i%2===0?"transparent":"var(--tint-015)" }} className="hover:bg-blue-50/30 transition-colors">
                 <td className="px-5 py-3.5">
                   {editId === d.id ? (
                     <div className="flex items-center gap-2 max-w-xs">
@@ -124,7 +124,7 @@ export default function DepartmentsPage() {
                 </td>
                 <td className="px-5 py-3.5">
                   <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-semibold ${d.is_active ? "text-emerald-700" : "text-gray-400"}`}
-                        style={{ background:d.is_active?"rgba(34,197,94,0.1)":"rgba(0,0,0,0.05)", border:`1px solid ${d.is_active?"rgba(34,197,94,0.2)":"rgba(0,0,0,0.1)"}` }}>
+                        style={{ background:d.is_active?"rgba(34,197,94,0.1)":"var(--tint-05)", border:`1px solid ${d.is_active?"rgba(34,197,94,0.2)":"var(--tint-10)"}` }}>
                     <span className={`w-1.5 h-1.5 rounded-full ${d.is_active?"bg-emerald-500":"bg-gray-300"}`} />{d.is_active?"Faol":"Nofaol"}
                   </span>
                 </td>
@@ -137,7 +137,7 @@ export default function DepartmentsPage() {
                             style={{ background:d.is_active?"rgba(225,29,72,0.07)":"rgba(5,150,105,0.07)", color:d.is_active?"#E11D48":"#059669" }}>
                       {d.is_active ? "Nofaol qilish" : "Faollashtir"}
                     </button>
-                    <button onClick={() => handleDelete(d)} className="text-xs px-2.5 py-1 rounded-lg font-medium btn-press" style={{ background:"rgba(0,0,0,0.05)", color:"#6B7280" }}>
+                    <button onClick={() => handleDelete(d)} className="text-xs px-2.5 py-1 rounded-lg font-medium btn-press" style={{ background:"var(--tint-05)", color:"#6B7280" }}>
                       O'chirish
                     </button>
                   </div>

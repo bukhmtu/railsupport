@@ -108,7 +108,7 @@ function TicketDetail({ ticket, user, technicians, onStatusChange, onAssign, onC
 
       {/* Dispatcher actions */}
       {user.role === "dispatcher" && (
-        <div className="space-y-4 pt-3" style={{ borderTop:"1px solid rgba(0,0,0,0.07)" }}>
+        <div className="space-y-4 pt-3" style={{ borderTop:"1px solid var(--tint-07)" }}>
           <div>
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1">
               <FaIcon name="fa-user-plus" color="#5E6AD2" size={10} /> Texnik xodimga biriktirish
@@ -121,8 +121,8 @@ function TicketDetail({ ticket, user, technicians, onStatusChange, onAssign, onC
                     <div className="flex items-center gap-2.5 w-full">
                       {opt.value
                         ? <Avatar name={opt.label} size="sm" />
-                        : <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background:"rgba(0,0,0,0.06)" }}><FaIcon name="fa-user" color="#9CA3AF" size={12} /></div>}
-                      <p className="text-sm font-semibold truncate" style={{ color:opt.value?"#1e293b":"#9CA3AF" }}>{opt.label}</p>
+                        : <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background:"var(--tint-06)" }}><FaIcon name="fa-user" color="#9CA3AF" size={12} /></div>}
+                      <p className="text-sm font-semibold truncate" style={{ color:opt.value?"var(--text-strong)":"#9CA3AF" }}>{opt.label}</p>
                     </div>
                   )}
                   renderSelected={opt => opt.label}
@@ -151,7 +151,7 @@ function TicketDetail({ ticket, user, technicians, onStatusChange, onAssign, onC
       )}
 
       {user.role === "admin" && (
-        <div className="pt-3" style={{ borderTop:"1px solid rgba(0,0,0,0.07)" }}>
+        <div className="pt-3" style={{ borderTop:"1px solid var(--tint-07)" }}>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Status o'zgartirish</p>
           <div className="flex flex-wrap gap-2">
             {(Object.entries(STATUS) as [TicketStatus, typeof STATUS[TicketStatus]][]).map(([k, v]) => (
@@ -167,7 +167,7 @@ function TicketDetail({ ticket, user, technicians, onStatusChange, onAssign, onC
       )}
 
       {user.role === "technician" && (
-        <div className="pt-3" style={{ borderTop:"1px solid rgba(0,0,0,0.07)" }}>
+        <div className="pt-3" style={{ borderTop:"1px solid var(--tint-07)" }}>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Statusni yangilash</p>
           <div className="flex gap-2 flex-wrap">
             <Btn onClick={() => { onStatusChange(ticket.id, "jarayon"); onClose(); }} variant="soft" size="sm">
