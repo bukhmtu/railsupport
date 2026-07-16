@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 import { G } from "../styles/glass";
 import { MENU, ROLE_META } from "../data/constants";
 import type { Role } from "../data/constants";
@@ -12,17 +13,14 @@ interface SidebarProps {
   user: User;
   page: string;
   setPage: (p: string) => void;
-  onLogout: () => void;
-  onProfileUpdated: (u: User) => void;
   notifCount: number;
   mobileOpen: boolean;
   onMobileClose: () => void;
 }
-export function Sidebar({ user, page, setPage, onLogout, onProfileUpdated, notifCount, mobileOpen, onMobileClose }: SidebarProps) {
+export function Sidebar({ user, page, setPage, notifCount, mobileOpen, onMobileClose }: SidebarProps) {
   const items = MENU[user.role as Role] ?? [];
   const rm    = ROLE_META[user.role as Role];
   const nav   = (k: string) => { setPage(k); onMobileClose(); };
-  const [showProfile, setShowProfile] = useState(false);
 
   return (
     <>
@@ -84,36 +82,18 @@ export function Sidebar({ user, page, setPage, onLogout, onProfileUpdated, notif
         </nav>
 
         <div className="p-3.5 flex-shrink-0" style={{ borderTop:"1px solid rgba(0,0,0,0.06)" }}>
-          <div className="rounded-2xl p-3" style={G.card}>
-            <div className="flex items-center gap-3 mb-3">
-              <Avatar name={user.fullname} />
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-gray-900 text-sm truncate">{user.fullname}</p>
-                <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ background:rm.bg, color:rm.fg }}>
-                  <FaIcon name={rm.icon} color={rm.iconColor} size={9} />{rm.label}
-                </span>
-              </div>
-              <button onClick={() => setShowProfile(true)} className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 btn-press"
-                      style={{ background:"rgba(0,0,0,0.05)" }} title="Profilni tahrirlash">
-                <FaIcon name="fa-pen" color="#6B7280" size={11} />
-              </button>
+          <div className="rounded-2xl p-3 flex items-center gap-3" style={G.card}>
+            <Avatar name={user.fullname} />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-gray-900 text-sm truncate">{user.fullname}</p>
+              <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium"
+                    style={{ background:rm.bg, color:rm.fg }}>
+                <FaIcon name={rm.icon} color={rm.iconColor} size={9} />{rm.label}
+              </span>
             </div>
-            <button onClick={onLogout}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-500 rounded-xl btn-press"
-              style={{ background:"rgba(239,68,68,0.06)", border:"1px solid rgba(239,68,68,0.1)" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.12)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.06)"; }}>
-              <FaIcon name="fa-arrow-right-from-bracket" color="#E11D48" size={11} />Tizimdan chiqish
-            </button>
           </div>
         </div>
       </aside>
-
-      {showProfile && (
-        <ProfileEditModal user={user} onClose={() => setShowProfile(false)}
-          onSaved={u => { onProfileUpdated(u); setShowProfile(false); }} />
-      )}
     </>
   );
 }
@@ -168,8 +148,88 @@ function ProfileEditModal({ user, onClose, onSaved }: ProfileEditModalProps) {
   );
 }
 
-interface HeaderProps { user: User; page: string; notifCount: number; onHamburger: () => void; }
-export function Header({ user, page, notifCount, onHamburger }: HeaderProps) {
+/* ─── FOYDALANUVCHI MENYUSI (Sozlamalar / Tizimdan chiqish) ───── */
+interface UserMenuProps { user: User; onLogout: () => void; onProfileUpdated: (u: User) => void; }
+function UserMenu({ user, onLogout, onProfileUpdated }: UserMenuProps) {
+  const [open, setOpen]         = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [rect, setRect]         = useState<{ top: number; right: number } | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef     = useRef<HTMLDivElement>(null);
+  const rm = ROLE_META[user.role as Role];
+
+  const updateRect = () => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setRect({ top: r.bottom + 8, right: window.innerWidth - r.right });
+  };
+
+  useLayoutEffect(() => { if (open) updateRect(); }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onScrollOrResize = () => updateRect();
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (triggerRef.current?.contains(t)) return;
+      if (menuRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  return (
+    <>
+      <button ref={triggerRef} onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-2 pl-2 border-l btn-press rounded-lg" style={{ borderColor:"rgba(0,0,0,0.08)" }}>
+        <Avatar name={user.fullname} size="sm" />
+        <div className="hidden sm:block text-left">
+          <p className="text-xs font-semibold text-gray-800 leading-tight">{user.fullname}</p>
+          <p className="text-xs" style={{ color:rm.fg }}>{rm.label}</p>
+        </div>
+        <FaIcon name={open ? "fa-chevron-up" : "fa-chevron-down"} color="#9CA3AF" size={10} className="hidden sm:block" />
+      </button>
+
+      {open && rect && createPortal(
+        <div ref={menuRef} className="gd-menu" style={{ ...G.dropdown, position:"fixed", top:rect.top, right:rect.right, width:200 }}>
+          <div className="gd-item" onClick={() => { setShowProfile(true); setOpen(false); }}>
+            <FaIcon name="fa-gear" color="#5E6AD2" size={12} /> Sozlamalar
+          </div>
+          <div className="gd-item" onClick={() => { setOpen(false); onLogout(); }} style={{ color:"#E11D48" }}>
+            <FaIcon name="fa-arrow-right-from-bracket" color="#E11D48" size={12} /> Tizimdan chiqish
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showProfile && (
+        <ProfileEditModal user={user} onClose={() => setShowProfile(false)}
+          onSaved={u => { onProfileUpdated(u); setShowProfile(false); }} />
+      )}
+    </>
+  );
+}
+
+interface HeaderProps {
+  user: User;
+  page: string;
+  notifCount: number;
+  onHamburger: () => void;
+  onLogout: () => void;
+  onProfileUpdated: (u: User) => void;
+}
+export function Header({ user, page, notifCount, onHamburger, onLogout, onProfileUpdated }: HeaderProps) {
   const [clock, setClock] = useState("");
 
   useEffect(() => {
@@ -181,7 +241,6 @@ export function Header({ user, page, notifCount, onHamburger }: HeaderProps) {
 
   const allPages = Object.values(MENU).flat();
   const pageItem = allPages.find(p => p.k === page);
-  const rm       = ROLE_META[user.role as Role];
 
   return (
     <header className="sticky top-0 z-30 flex-shrink-0 px-4 sm:px-5 h-14 flex items-center justify-between" style={G.header}>
@@ -217,13 +276,7 @@ export function Header({ user, page, notifCount, onHamburger }: HeaderProps) {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 pl-2 border-l" style={{ borderColor:"rgba(0,0,0,0.08)" }}>
-          <Avatar name={user.fullname} size="sm" />
-          <div className="hidden sm:block">
-            <p className="text-xs font-semibold text-gray-800 leading-tight">{user.fullname}</p>
-            <p className="text-xs" style={{ color:rm.fg }}>{rm.label}</p>
-          </div>
-        </div>
+        <UserMenu user={user} onLogout={onLogout} onProfileUpdated={onProfileUpdated} />
       </div>
     </header>
   );

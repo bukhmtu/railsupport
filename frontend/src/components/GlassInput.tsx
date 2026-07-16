@@ -1,8 +1,12 @@
-import { useState, useEffect, useRef, ReactNode } from "react";
+import { useState, useEffect, useRef, useLayoutEffect, ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { G } from "../styles/glass";
 import { FaIcon } from "./Atoms";
 
 /* ─── GlassDropdown ──────────────────────────────────────────── */
+/* Menyu document.body ga portal qilinadi — shu bilan sahifadagi
+   backdrop-filter'li kartalar (o'zining stacking context'i borligi sababli)
+   dropdown ustidan chiqib qolish muammosi butunlay yo'qoladi. */
 interface DropdownOption { value: string; label: string; }
 interface GlassDropdownProps {
   value: string;
@@ -13,11 +17,38 @@ interface GlassDropdownProps {
   renderSelected?: (opt: DropdownOption) => ReactNode;
 }
 export function GlassDropdown({ value, onChange, options, placeholder, renderOption, renderSelected }: GlassDropdownProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [open, setOpen]   = useState(false);
+  const [rect, setRect]   = useState<{ top: number; left: number; width: number } | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const updateRect = () => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setRect({ top: r.bottom + 6, left: r.left, width: r.width });
+  };
+
+  useLayoutEffect(() => { if (open) updateRect(); }, [open]);
 
   useEffect(() => {
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    if (!open) return;
+    const onScrollOrResize = () => updateRect();
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (wrapRef.current?.contains(t)) return;
+      if (menuRef.current?.contains(t)) return;
+      setOpen(false);
+    };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, []);
@@ -25,15 +56,15 @@ export function GlassDropdown({ value, onChange, options, placeholder, renderOpt
   const selected = options.find(o => o.value === value);
 
   return (
-    <div className="gd-wrap" ref={ref}>
+    <div className="gd-wrap" ref={wrapRef}>
       <button className="gd-trigger glass-input" style={G.input} onClick={() => setOpen(o => !o)}>
         <span style={{ color: selected ? "#1e293b" : "#94a3b8", flex:1, textAlign:"left" }}>
           {selected ? (renderSelected ? renderSelected(selected) : selected.label) : placeholder}
         </span>
         <FaIcon name={open ? "fa-chevron-up" : "fa-chevron-down"} color="#5E6AD2" size={11} />
       </button>
-      {open && (
-        <div className="gd-menu" style={G.dropdown}>
+      {open && rect && createPortal(
+        <div ref={menuRef} className="gd-menu" style={{ ...G.dropdown, position:"fixed", top:rect.top, left:rect.left, width:rect.width }}>
           {options.map((opt, i) => {
             const isSel = opt.value === value;
             return (
@@ -44,7 +75,8 @@ export function GlassDropdown({ value, onChange, options, placeholder, renderOpt
               </div>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -37,7 +37,7 @@ select.glass-input{appearance:none;-webkit-appearance:none;background-image:url(
 .gd-wrap{position:relative;user-select:none;}
 .gd-trigger{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:40px;padding:0 14px;border-radius:12px;cursor:pointer;font-size:13.5px;font-weight:500;transition:all .15s ease;outline:none;}
 .gd-trigger:hover{border-color:rgba(94,106,210,0.4)!important;}
-.gd-menu{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:999;border-radius:14px;padding:6px;overflow:hidden;animation:menuPop .15s cubic-bezier(.4,0,.2,1);}
+.gd-menu{z-index:1000;border-radius:14px;padding:6px;overflow-y:auto;overflow-x:hidden;max-height:280px;animation:menuPop .15s cubic-bezier(.4,0,.2,1);}
 @keyframes menuPop{from{opacity:0;transform:translateY(-6px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 .gd-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:500;color:#334155;transition:all .12s ease;}
 .gd-item:hover{background:rgba(94,106,210,0.07);color:#3730A3;}
