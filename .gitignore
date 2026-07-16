@@ -1,0 +1,26 @@
+# Frontend
+frontend/node_modules
+frontend/dist
+frontend/.env
+frontend/.env.local
+
+# Backend (legacy)
+backend/venv
+backend/__pycache__
+backend/**/__pycache__
+backend/*.db
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/.env
+
+# Supabase
+supabase/seed/node_modules
+supabase/seed/.env
+supabase/.temp
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Claude Code local settings (shaxsiy, repo uchun kerak emas)
+.claude/
