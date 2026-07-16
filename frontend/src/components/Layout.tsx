@@ -1,4 +1,5 @@
 import { useEffect, ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { CSS, G } from "../styles/glass";
 import { FaIcon } from "./Atoms";
 
@@ -28,7 +29,7 @@ export function Modal({ title, onClose, children, wide = false }: ModalProps) {
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 anim-fade"
          style={{ background:"rgba(15,23,42,0.38)", backdropFilter:"blur(6px)", WebkitBackdropFilter:"blur(6px)" }}
          onClick={e => e.target === e.currentTarget && onClose()}>
@@ -45,6 +46,7 @@ export function Modal({ title, onClose, children, wide = false }: ModalProps) {
         </div>
         <div className="px-5 py-4 overflow-y-auto flex-1">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -3,11 +3,22 @@ import { createPortal } from "react-dom";
 import { G } from "../styles/glass";
 import { MENU, ROLE_META } from "../data/constants";
 import type { Role } from "../data/constants";
-import type { User } from "../App";
+import type { User, Ticket } from "../App";
 import { Avatar, FaIcon, Btn } from "./Atoms";
 import { GlassInput } from "./GlassInput";
 import { Modal } from "./Layout";
 import { api } from "../api/api";
+
+function notifTargetPage(role: string): string {
+  if (role === "dispatcher") return "new-tickets";
+  if (role === "technician") return "my-tasks";
+  if (role === "admin")      return "all-tickets";
+  return "my-tickets";
+}
+export function notifTickets(tickets: Ticket[], user: User): Ticket[] {
+  if (user.role === "technician") return tickets.filter(t => t.assigned_to === user.id && t.status === "qabul");
+  return tickets.filter(t => t.status === "yangi");
+}
 
 interface SidebarProps {
   user: User;
@@ -221,15 +232,101 @@ function UserMenu({ user, onLogout, onProfileUpdated }: UserMenuProps) {
   );
 }
 
+/* ─── BILDIRISHNOMALAR (Qo'ng'iroqcha) ────────────────────────── */
+interface NotificationBellProps { tickets: Ticket[]; user: User; onNavigate: (page: string) => void; }
+function NotificationBell({ tickets, user, onNavigate }: NotificationBellProps) {
+  const [open, setOpen] = useState(false);
+  const [rect, setRect] = useState<{ top: number; right: number } | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef     = useRef<HTMLDivElement>(null);
+
+  const items = notifTickets(tickets, user);
+  const targetPage = notifTargetPage(user.role);
+
+  const updateRect = () => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setRect({ top: r.bottom + 8, right: window.innerWidth - r.right });
+  };
+
+  useLayoutEffect(() => { if (open) updateRect(); }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onScrollOrResize = () => updateRect();
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (triggerRef.current?.contains(t)) return;
+      if (menuRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  const goToList = () => { onNavigate(targetPage); setOpen(false); };
+
+  return (
+    <div className="relative">
+      <button ref={triggerRef} onClick={() => setOpen(o => !o)} className="w-9 h-9 rounded-xl flex items-center justify-center btn-press" style={G.card}>
+        <FaIcon name="fa-bell" color="#6B7280" size={14} />
+      </button>
+      {items.length > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center rounded-full text-white font-bold"
+              style={{ background:"linear-gradient(135deg,#E11D48,#F59E0B)", fontSize:9, boxShadow:"0 2px 6px rgba(239,68,68,0.5)" }}>
+          {items.length}
+        </span>
+      )}
+      {open && rect && createPortal(
+        <div ref={menuRef} className="gd-menu" style={{ ...G.dropdown, position:"fixed", top:rect.top, right:rect.right, width:300, padding:0 }}>
+          <div className="px-4 py-3" style={{ borderBottom:"1px solid rgba(0,0,0,0.06)" }}>
+            <span className="font-semibold text-gray-800 text-sm">Bildirishnomalar</span>
+          </div>
+          <div style={{ maxHeight: 280, overflowY: "auto" }}>
+            {items.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-8">Yangi bildirishnoma yo'q</p>
+            ) : items.slice(0, 8).map(t => (
+              <div key={t.id} className="gd-item" style={{ borderRadius: 0, alignItems: "flex-start" }} onClick={goToList}>
+                <div className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5" style={{ background:"#D97706" }} />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">{t.fullname} — {t.problem_type}</p>
+                  <p className="text-xs text-gray-400 truncate">{t.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          {items.length > 0 && (
+            <div className="px-4 py-2.5" style={{ borderTop:"1px solid rgba(0,0,0,0.06)" }}>
+              <button onClick={goToList} className="text-xs font-semibold text-blue-600 w-full text-center">Barchasini ko'rish</button>
+            </div>
+          )}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
 interface HeaderProps {
   user: User;
   page: string;
-  notifCount: number;
+  tickets: Ticket[];
+  onNavigate: (page: string) => void;
   onHamburger: () => void;
   onLogout: () => void;
   onProfileUpdated: (u: User) => void;
 }
-export function Header({ user, page, notifCount, onHamburger, onLogout, onProfileUpdated }: HeaderProps) {
+export function Header({ user, page, tickets, onNavigate, onHamburger, onLogout, onProfileUpdated }: HeaderProps) {
   const [clock, setClock] = useState("");
 
   useEffect(() => {
@@ -265,17 +362,7 @@ export function Header({ user, page, notifCount, onHamburger, onLogout, onProfil
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold text-gray-500" style={G.card}>
           <FaIcon name="fa-clock" color="#5E6AD2" size={10} />{clock}
         </div>
-        <div className="relative">
-          <button className="w-9 h-9 rounded-xl flex items-center justify-center btn-press" style={G.card}>
-            <FaIcon name="fa-bell" color="#6B7280" size={14} />
-          </button>
-          {notifCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center rounded-full text-white font-bold"
-                  style={{ background:"linear-gradient(135deg,#E11D48,#F59E0B)", fontSize:9, boxShadow:"0 2px 6px rgba(239,68,68,0.5)" }}>
-              {notifCount}
-            </span>
-          )}
-        </div>
+        <NotificationBell tickets={tickets} user={user} onNavigate={onNavigate} />
         <UserMenu user={user} onLogout={onLogout} onProfileUpdated={onProfileUpdated} />
       </div>
     </header>

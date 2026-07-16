@@ -3,7 +3,8 @@ import { api, connectWS } from "./api/api";
 import type { ApiUser, ApiTicket } from "./api/api";
 import type { TicketStatus, Priority } from "./data/constants";
 import { BgBlobs } from "./components/Layout";
-import { Sidebar, Header } from "./components/Navigation";
+import { Sidebar, Header, notifTickets } from "./components/Navigation";
+import { NewTicketToast } from "./components/Toast";
 import { PageTitle } from "./components/Atoms";
 import LoginPage from "./pages/LoginPage";
 import { TicketList, NewTicketForm } from "./pages/TicketPages";
@@ -56,8 +57,9 @@ export default function App() {
   const [allUsers,    setAllUsers]    = useState<User[]>([]);
   const [loading,     setLoading]     = useState(false);
   const [mobileOpen,  setMobileOpen]  = useState(false);
+  const [toast,       setToast]       = useState<{ ticket: Ticket; kind: "new" | "assigned" } | null>(null);
 
-  const notifCount = tickets.filter(t => t.status === "yangi").length;
+  const notifCount = user ? notifTickets(tickets, user).length : 0;
 
   /* ── Ticketlarni yuklash ─────────────────────────────────── */
   const loadTickets = useCallback(async () => {
@@ -138,10 +140,13 @@ export default function App() {
   useEffect(() => {
     if (!user) return;
     const ws = connectWS({
-      "ticket:new":     (t) => setTickets(p => {
+      "ticket:new":     (t) => {
         const mapped = apiToTicket(t);
-        return [mapped, ...p.filter(x => x.id !== mapped.id)];
-      }),
+        setTickets(p => [mapped, ...p.filter(x => x.id !== mapped.id)]);
+        if (user.role === "dispatcher" || user.role === "admin") {
+          setToast({ ticket: mapped, kind: "new" });
+        }
+      },
       "ticket:updated": (t) => setTickets(p => {
         const mapped = apiToTicket(t);
         const exists = p.some(x => x.id === mapped.id);
@@ -151,6 +156,7 @@ export default function App() {
         const mapped = apiToTicket(t);
         if (user.role === "technician" && mapped.assigned_to === user.id) {
           setTickets(p => [mapped, ...p.filter(x => x.id !== mapped.id)]);
+          setToast({ ticket: mapped, kind: "assigned" });
         }
       },
     });
@@ -224,13 +230,18 @@ export default function App() {
         <Sidebar user={user} page={page} setPage={setPage} notifCount={notifCount}
           mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-          <Header user={user} page={page} notifCount={notifCount} onHamburger={() => setMobileOpen(o => !o)}
+          <Header user={user} page={page} tickets={tickets} onNavigate={setPage} onHamburger={() => setMobileOpen(o => !o)}
             onLogout={logout} onProfileUpdated={setUser} />
           <main className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6">
             <div className="max-w-5xl mx-auto">{renderPage()}</div>
           </main>
         </div>
       </div>
+      {toast && (
+        <NewTicketToast ticket={toast.ticket} kind={toast.kind}
+          onView={() => { setPage(toast.kind === "assigned" ? "my-tasks" : "new-tickets"); setToast(null); }}
+          onClose={() => setToast(null)} />
+      )}
     </>
   );
 }
